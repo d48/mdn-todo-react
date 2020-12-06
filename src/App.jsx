@@ -6,9 +6,17 @@ import Todo from './components/Todo';
 import Form from './components/Form';
 import FilterButton from './components/FilterButton';
 
+const FILTER_MAP = {
+  All: () => true,
+  Active: (task) => !task.completed,
+  Completed: (task) => task.completed,
+};
+const FILTER_NAMES = Object.keys(FILTER_MAP);
+
 function App(props) {
   // eslint-disable-next-line react/destructuring-assignment
   const [tasks = [], setTasks] = useState(props.tasks);
+  const [filter, setFilter] = useState('All');
 
   const addTask = (task) => {
     const newTask = {
@@ -48,15 +56,26 @@ function App(props) {
     setTasks(updatedTasks);
   };
 
-  const taskList = tasks.map((task) => (
-    <Todo
-      id={task.id}
-      name={task.name}
-      completed={task.completed}
-      key={task.id}
-      toggleTaskCompleted={toggleTaskCompleted}
-      deleteTask={deleteTask}
-      editTask={editTask}
+  const taskList = tasks
+    .filter(FILTER_MAP[filter])
+    .map((task) => (
+      <Todo
+        id={task.id}
+        name={task.name}
+        completed={task.completed}
+        key={task.id}
+        toggleTaskCompleted={toggleTaskCompleted}
+        deleteTask={deleteTask}
+        editTask={editTask}
+      />
+    ));
+
+  const filterList = FILTER_NAMES.map((name) => (
+    <FilterButton
+      isPressed={name === filter}
+      setFilter={setFilter}
+      key={name}
+      name={name}
     />
   ));
 
@@ -67,9 +86,7 @@ function App(props) {
     <div className="todoapp stack-large">
       <Form addTask={addTask} />
       <div className="filters btn-group stack-exception">
-        <FilterButton />
-        <FilterButton />
-        <FilterButton />
+        {filterList}
       </div>
       <h2 id="list-heading">
         {heading}
